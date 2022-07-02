@@ -12,6 +12,9 @@
 #include <stdexcept>
 #include <vector>
 
+#include <iostream>
+
+#include "rubiks_cube/rubiks_cube.h"
 #include "utils/translate.h"
 
 #define Z_NEAR 0.5
@@ -20,7 +23,7 @@
 class Program;
 
 Program *program;
-GLuint vao_id;
+std::vector<GLuint> vao_ids(26);
 
 double distance = 50;
 double angle_alpha = 0;
@@ -30,158 +33,7 @@ double sky_up = 1;
 int old_pos_x = 0;
 int old_pos_y = 0;
 
-std::vector<GLfloat> vertex_buffer_data = {};
-
-void make_cylinder(float r, float z0, float z1, int N = 100) {
-  float angle_step = 2 * M_PI / N;
-  float last_x = r;
-  float last_y = 0;
-  // float centerx = 0;
-  // float centery = 0;
-
-  for (int i = 1; i <= N; i++) {
-    float angle = angle_step * i;
-    float x = r * cos(angle);
-    float y = r * sin(angle);
-
-    vertex_buffer_data.push_back(last_x);
-    vertex_buffer_data.push_back(last_y);
-    vertex_buffer_data.push_back(z0);
-
-    vertex_buffer_data.push_back(last_x);
-    vertex_buffer_data.push_back(last_y);
-    vertex_buffer_data.push_back(z1);
-
-    vertex_buffer_data.push_back(x);
-    vertex_buffer_data.push_back(y);
-    vertex_buffer_data.push_back(z0);
-
-    vertex_buffer_data.push_back(x);
-    vertex_buffer_data.push_back(y);
-    vertex_buffer_data.push_back(z0);
-
-    vertex_buffer_data.push_back(last_x);
-    vertex_buffer_data.push_back(last_y);
-    vertex_buffer_data.push_back(z1);
-
-    vertex_buffer_data.push_back(x);
-    vertex_buffer_data.push_back(y);
-    vertex_buffer_data.push_back(z1);
-
-    last_x = x;
-    last_y = y;
-  }
-}
-
-// Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
-// A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
-static const std::vector<GLfloat> cube_vertex_buffer_data = {
-    // RED
-    -1.0f,-1.0f,-1.0f,
-    -1.0f,-1.0f, 1.0f,
-    -1.0f, 1.0f, 1.0f,
-
-    -1.0f,-1.0f,-1.0f,
-    -1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f,-1.0f,
-
-    // GREEN
-    1.0f, 1.0f,-1.0f,
-    -1.0f,-1.0f,-1.0f,
-    -1.0f, 1.0f,-1.0f,
-
-    1.0f, 1.0f,-1.0f,
-    1.0f,-1.0f,-1.0f,
-    -1.0f,-1.0f,-1.0f,
-
-    // ORANGE
-    -1.0f, 1.0f, 1.0f,
-    -1.0f,-1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f,
-
-    1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f,
-
-    // BLUE
-    1.0f,-1.0f,-1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f,
-
-    1.0f, 1.0f, 1.0f,
-    1.0f,-1.0f,-1.0f,
-    1.0f, 1.0f,-1.0f,
-
-    // YELLOW
-    1.0f,-1.0f, 1.0f,
-    -1.0f,-1.0f,-1.0f,
-    1.0f,-1.0f,-1.0f,
-
-    1.0f,-1.0f, 1.0f,
-    -1.0f,-1.0f, 1.0f,
-    -1.0f,-1.0f,-1.0f,
-
-    // WHITE
-    1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f,-1.0f,
-    -1.0f, 1.0f, 1.0f,
-
-    1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f,-1.0f,
-    -1.0f, 1.0f,-1.0f,
-};
-
-
-static const std::vector<GLfloat> cube_color_buffer_data = {
-    // Red
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
-
-    // Green 
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
-
-    // Orange
-    1.0, 0.5, 0.0,
-    1.0, 0.5, 0.0,
-    1.0, 0.5, 0.0,
-    1.0, 0.5, 0.0,
-    1.0, 0.5, 0.0,
-    1.0, 0.5, 0.0,
-
-    // Blue
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-
-    // Yellow
-    1.0, 1.0, 0.0, 
-    1.0, 1.0, 0.0, 
-    1.0, 1.0, 0.0, 
-    1.0, 1.0, 0.0, 
-    1.0, 1.0, 0.0, 
-    1.0, 1.0, 0.0, 
-
-    // White
-    1.0, 1.0, 1.0,
-    1.0, 1.0, 1.0,
-    1.0, 1.0, 1.0,
-    1.0, 1.0, 1.0,
-    1.0, 1.0, 1.0,
-    1.0, 1.0, 1.0,
-};
-
+RubiksCube rubiks_cube;
 
 void test_opengl_error(std::string func, std::string file, int line) {
   GLenum err = glGetError();
@@ -231,7 +83,8 @@ void test_opengl_error(std::string func, std::string file, int line) {
 bool init_glew() { return (glewInit() == GLEW_OK); }
 
 bool init_GL() {
-  glEnable(GL_DEPTH_TEST);TEST_OPENGL_ERROR();
+  glEnable(GL_DEPTH_TEST);
+  TEST_OPENGL_ERROR();
   glClearColor(0.4, 0.4, 0.4, 1.0);
   TEST_OPENGL_ERROR();
   return true;
@@ -365,64 +218,56 @@ Program *init_program() {
 }
 
 bool init_object(Program *program) {
-  int max_nb_vbo = 5;
-  int nb_vbo = 0;
-  int index_vbo = 0;
-  GLuint vbo_ids[max_nb_vbo];
+  for (size_t i = 0; i < rubiks_cube.cubes.size(); i++) {
+    int max_nb_vbo = 2;
+    int nb_vbo = 0;
+    int index_vbo = 0;
+    GLuint vbo_ids[max_nb_vbo];
 
-  GLint vertex_location = glGetAttribLocation(program->program_id, "position");
-  TEST_OPENGL_ERROR();
-  // GLint normal_smooth_location = glGetAttribLocation(program->program_id, "normalSmooth");
-  // TEST_OPENGL_ERROR();
-  GLint color_location = glGetAttribLocation(program->program_id, "color");
-  TEST_OPENGL_ERROR();
+    GLint vertex_location =
+        glGetAttribLocation(program->program_id, "position");
+    TEST_OPENGL_ERROR();
+    GLint color_location = glGetAttribLocation(program->program_id, "color");
+    TEST_OPENGL_ERROR();
 
-  glGenVertexArrays(1, &vao_id);
-  TEST_OPENGL_ERROR();
-  glBindVertexArray(vao_id);
-  TEST_OPENGL_ERROR();
+    glGenVertexArrays(1, &vao_ids[i]);
+    TEST_OPENGL_ERROR();
+    glBindVertexArray(vao_ids[i]);
+    TEST_OPENGL_ERROR();
 
-  if (vertex_location != -1) nb_vbo++;
-  // if (normal_smooth_location != -1) nb_vbo++;
-  if (color_location != -1) nb_vbo++;
-  glGenBuffers(nb_vbo, vbo_ids);
-  TEST_OPENGL_ERROR();
+    if (vertex_location != -1) nb_vbo++;
+    if (color_location != -1) nb_vbo++;
+    glGenBuffers(nb_vbo, vbo_ids);
+    TEST_OPENGL_ERROR();
 
-  if (vertex_location != -1) {
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_ids[index_vbo++]);
-    TEST_OPENGL_ERROR();
-    glBufferData(GL_ARRAY_BUFFER, vertex_buffer_data.size() * sizeof(float),
-                 vertex_buffer_data.data(), GL_STATIC_DRAW);
-    TEST_OPENGL_ERROR();
-    glVertexAttribPointer(vertex_location, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    TEST_OPENGL_ERROR();
-    glEnableVertexAttribArray(vertex_location);
-    TEST_OPENGL_ERROR();
+    if (vertex_location != -1) {
+      glBindBuffer(GL_ARRAY_BUFFER, vbo_ids[index_vbo++]);
+      TEST_OPENGL_ERROR();
+      glBufferData(GL_ARRAY_BUFFER,
+                   rubiks_cube.cubes[i].vertices.size() * sizeof(float),
+                   rubiks_cube.cubes[i].vertices.data(), GL_STATIC_DRAW);
+      TEST_OPENGL_ERROR();
+      glVertexAttribPointer(vertex_location, 3, GL_FLOAT, GL_FALSE, 0, 0);
+      TEST_OPENGL_ERROR();
+      glEnableVertexAttribArray(vertex_location);
+      TEST_OPENGL_ERROR();
+    }
+
+    if (color_location != -1) {
+      glBindBuffer(GL_ARRAY_BUFFER, vbo_ids[index_vbo++]);
+      TEST_OPENGL_ERROR();
+      glBufferData(GL_ARRAY_BUFFER, cube_color.size() * sizeof(float),
+                   cube_color.data(), GL_STATIC_DRAW);
+      TEST_OPENGL_ERROR();
+      glVertexAttribPointer(color_location, 3, GL_FLOAT, GL_FALSE, 0, 0);
+      TEST_OPENGL_ERROR();
+      glEnableVertexAttribArray(color_location);
+      TEST_OPENGL_ERROR();
+    }
+
+    glBindVertexArray(0);
   }
 
-  // if (normal_smooth_location != -1) {
-  //   glBindBuffer(GL_ARRAY_BUFFER, vbo_ids[index_vbo++]);
-  //   TEST_OPENGL_ERROR();
-  //   glBufferData(GL_ARRAY_BUFFER,
-  //                normal_smooth_buffer_data.size() * sizeof(float),
-  //                normal_smooth_buffer_data.data(), GL_STATIC_DRAW);
-  //   TEST_OPENGL_ERROR();
-  //   glVertexAttribPointer(normal_smooth_location, 3, GL_FLOAT, GL_FALSE, 0,
-  //   0); TEST_OPENGL_ERROR();
-  //   glEnableVertexAttribArray(normal_smooth_location);
-  //   TEST_OPENGL_ERROR();
-  // }
-
-  if (color_location!=-1) {
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_ids[index_vbo++]);TEST_OPENGL_ERROR();
-    glBufferData(GL_ARRAY_BUFFER, cube_color_buffer_data.size()*sizeof(float), cube_color_buffer_data.data(), GL_STATIC_DRAW);TEST_OPENGL_ERROR();
-    glVertexAttribPointer(color_location, 3, GL_FLOAT, GL_FALSE, 0, 0);TEST_OPENGL_ERROR();
-    glEnableVertexAttribArray(color_location);TEST_OPENGL_ERROR();
-  }
-
-
-
-  glBindVertexArray(0);
   return true;
 }
 
@@ -440,10 +285,12 @@ void display() {
   glUseProgram(program->program_id);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   TEST_OPENGL_ERROR();
-  glBindVertexArray(vao_id);
-  TEST_OPENGL_ERROR();
-  glDrawArrays(GL_TRIANGLES, 0, vertex_buffer_data.size() / 3);
-  TEST_OPENGL_ERROR();
+  for (auto vao_id : vao_ids) {
+    glBindVertexArray(vao_id);
+    TEST_OPENGL_ERROR();
+    glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size() / 3);
+    TEST_OPENGL_ERROR();
+  }
   glBindVertexArray(0);
   TEST_OPENGL_ERROR();
   glutSwapBuffers();
@@ -660,11 +507,7 @@ int main(int argc, char *argv[]) {
   if (!init_GL()) throw new std::runtime_error("Gl error");
   program = init_program();
 
-  vertex_buffer_data = cube_vertex_buffer_data;
-  vertex_buffer_data =  translate(vertex_buffer_data, 1, 0, 0);
-
   if (!init_object(program)) throw new std::runtime_error("Object error");
-
 
   glutMainLoop();
 
