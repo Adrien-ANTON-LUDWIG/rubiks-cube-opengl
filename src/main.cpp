@@ -17,6 +17,7 @@
 #include "rubiks_cube/rubiks_cube.h"
 #include "utils/translate.h"
 
+# define PI 3.14159265358979323846
 #define Z_NEAR 0.5
 #define Z_FAR 100
 
@@ -26,8 +27,8 @@ Program *program;
 std::vector<GLuint> vao_ids(26);
 
 double distance = 50;
-double angle_alpha = 0;
-double angle_beta = 0;
+double angle_alpha = 45 * PI / 180;
+double angle_beta = 45 * PI / 180;
 double sky_up = 1;
 
 int old_pos_x = 0;
@@ -508,6 +509,8 @@ int main(int argc, char *argv[]) {
   program = init_program();
 
   if (!init_object(program)) throw new std::runtime_error("Object error");
+
+  update_position();
 
   glutMainLoop();
 
