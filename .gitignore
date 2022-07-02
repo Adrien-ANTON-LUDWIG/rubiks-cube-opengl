@@ -35,3 +35,9 @@
 images
 *.ong
 *.jpg
+
+# Vscode
+*.vscode
+
+# Binaries
+rubiks-cube-opengl
