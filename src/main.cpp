@@ -12,12 +12,17 @@
 #include <stdexcept>
 #include <vector>
 
+#include "utils/translate.h"
+
+#define Z_NEAR 0.5
+#define Z_FAR 100
+
 class Program;
 
 Program *program;
 GLuint vao_id;
 
-double distance = 17;
+double distance = 50;
 double angle_alpha = 0;
 double angle_beta = 0;
 double sky_up = 1;
@@ -566,7 +571,7 @@ void update_position() {
   // std::endl;
   glUniformMatrix4fv(model_view_matrix_location, 1, GL_TRUE, model_view_matrix);
 
-  frustum(projection_matrix, -0.05, 0.05, -0.05, 0.05, 0.5, 50);
+  frustum(projection_matrix, -0.05, 0.05, -0.05, 0.05, Z_NEAR, Z_FAR);
   GLint projection_matrix_location =
       glGetUniformLocation(program->program_id, "projection_matrix");
   glUniformMatrix4fv(projection_matrix_location, 1, GL_TRUE, projection_matrix);
@@ -654,9 +659,12 @@ int main(int argc, char *argv[]) {
   if (!init_glew()) throw new std::runtime_error("Glew error");
   if (!init_GL()) throw new std::runtime_error("Gl error");
   program = init_program();
-  // make_cylinder(1.0, 0.0, 2.0);
+
   vertex_buffer_data = cube_vertex_buffer_data;
+  vertex_buffer_data =  translate(vertex_buffer_data, 1, 0, 0);
+
   if (!init_object(program)) throw new std::runtime_error("Object error");
+
 
   glutMainLoop();
 
