@@ -6,12 +6,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
+ 
+// Debug
+#include <glm/gtx/string_cast.hpp>
+#include <iostream>
 
 #include "cube.h"
 
 class Cube {
  public:
-  glm::vec4 origin_center = glm::vec4(0.0f);
+  glm::vec4 origin_center = glm::vec4(0.0, 0.0, 0.0, 1.0); // Homographic coordinates
   glm::vec4 current_center = origin_center;
   glm::mat4 transform = glm::mat4(1.0f);
   std::vector<GLfloat> vertices = cube_vertices;
@@ -27,6 +31,12 @@ class Cube {
     origin_center[1] += y;
     origin_center[2] += z;
     current_center = origin_center;
+  }
+
+  void rotate(const float angle, const glm::vec3 &rotationAxis) {
+    float angleRad = glm::radians(angle);
+    transform = glm::rotate(transform, angleRad, rotationAxis);
+    current_center = transform * origin_center;
   }
 };
 
@@ -45,6 +55,7 @@ class RubiksCube {
   }
 
   void translate(GLfloat x, GLfloat y, GLfloat z);
+  void rotate(const float angle, const glm::vec3 &rotationAxis);
 
   std::vector<Cube> cubes;
 };

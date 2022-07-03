@@ -472,6 +472,9 @@ void mouse_callback(int button, int, int x, int y) {
   if (button == GLUT_LEFT_BUTTON) {
     old_pos_x = x;
     old_pos_y = y;
+    rubiks_cube.rotate(45.0, glm::vec3(1, 0, 0));
+    update_position();
+    glutPostRedisplay();
   }
   if (button == 3)
     mouse_wheel_callback(button, -1, x, y);
