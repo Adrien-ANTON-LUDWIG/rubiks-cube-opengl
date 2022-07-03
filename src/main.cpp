@@ -27,8 +27,8 @@ Program *program;
 std::vector<GLuint> vao_ids(26);
 
 double distance = 50;
-double angle_alpha = 45 * PI / 180;
-double angle_beta = 45 * PI / 180;
+double angle_alpha = 45 * PI / 180; // 45° to radians
+double angle_beta = 45 * PI / 180; // 45° to radians
 double sky_up = 1;
 
 int old_pos_x = 0;
@@ -428,8 +428,8 @@ void update_position() {
 }
 
 void mouse_motion_callback(int x, int y) {
-  double alpha = angle_alpha - (old_pos_x - x) * M_PI / 50.0;
-  double beta = angle_beta - (old_pos_y - y) * M_PI / 50.0;
+  double alpha = angle_alpha - (old_pos_x - x) * M_PI / 500.0;
+  double beta = angle_beta - (old_pos_y - y) * M_PI / 500.0;
   double sky;
 
   if (beta > M_PI / 2.0) {
