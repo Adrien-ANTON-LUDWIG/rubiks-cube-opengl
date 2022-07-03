@@ -276,19 +276,20 @@ void display() {
   static int counter = 0;
   counter++;
 
-  // static glm::vec3 red(1.0, 0.0, 0.0);
-  // static glm::vec3 green(0.0, 1.0, 0.0);
-  // static glm::vec3 blue(0.0, 0.0, 1.0);
-  // static glm::vec3 colors[] = {red, green, blue};
-  // GLuint color_location = glGetUniformLocation(program->program_id, "color");
-  // glUniform3fv(color_location, 1, glm::value_ptr(colors[counter % 3]));
 
   glUseProgram(program->program_id);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   TEST_OPENGL_ERROR();
-  for (auto vao_id : vao_ids) {
-    glBindVertexArray(vao_id);
+
+  for (size_t i = 0; i < vao_ids.size(); i++) {
+    glBindVertexArray(vao_ids[i]);
     TEST_OPENGL_ERROR();
+
+    // Pass the cube transformation matrix to the vertex shader
+    GLuint transform_location = glGetUniformLocation(program->program_id, "transform");
+    glUniformMatrix4fv(transform_location, 1, GL_FALSE, glm::value_ptr(rubiks_cube.cubes[i].transform));
+    TEST_OPENGL_ERROR();
+
     glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size() / 3);
     TEST_OPENGL_ERROR();
   }

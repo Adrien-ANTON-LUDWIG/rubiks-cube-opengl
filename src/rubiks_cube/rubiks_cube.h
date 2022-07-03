@@ -2,13 +2,18 @@
 
 #include <GL/freeglut.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 
 #include "cube.h"
 
 class Cube {
  public:
-  std::vector<GLfloat> center = {0.0, 0.0, 0.0};
+  glm::vec4 origin_center = glm::vec4(0.0f);
+  glm::vec4 current_center = origin_center;
+  glm::mat4 transform = glm::mat4(1.0f);
   std::vector<GLfloat> vertices = cube_vertices;
 
   void translate(GLfloat x, GLfloat y, GLfloat z) {
@@ -18,9 +23,10 @@ class Cube {
       vertices[i + 2] += z;
     }
 
-    center[0] += x;
-    center[1] += y;
-    center[2] += z;
+    origin_center[0] += x;
+    origin_center[1] += y;
+    origin_center[2] += z;
+    current_center = origin_center;
   }
 };
 
@@ -29,16 +35,16 @@ class RubiksCube {
   RubiksCube() {
     cubes = std::vector<Cube>(26);
     int i = 0;
-    for (int x = -2; x <= 2; x+=2)
-      for (int y = -2; y <= 2; y+=2)
-        for (int z = -2; z <= 2; z+=2) {
+    for (int x = -2; x <= 2; x += 2)
+      for (int y = -2; y <= 2; y += 2)
+        for (int z = -2; z <= 2; z += 2) {
           if (x == 0 && y == 0 && z == 0) continue;
           cubes[i].translate(x, y, z);
           i++;
         }
   }
 
-  void init();
+  void translate(GLfloat x, GLfloat y, GLfloat z);
 
   std::vector<Cube> cubes;
 };
