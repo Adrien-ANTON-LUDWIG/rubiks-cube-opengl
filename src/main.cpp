@@ -11,7 +11,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
-#include <iostream>
 
 #include "rubiks_cube/rubiks_cube.h"
 #include "utils/translate.h"
@@ -26,15 +25,14 @@ Program *program;
 std::vector<GLuint> vao_ids(26);
 
 double distance = 50;
-double angle_alpha = 45 * PI / 180; // 45° to radians
-double angle_beta = 45 * PI / 180; // 45° to radians
+double angle_alpha = 45 * PI / 180;  // 45° to radians
+double angle_beta = 45 * PI / 180;   // 45° to radians
 double sky_up = 1;
 
 int old_pos_x = 0;
 int old_pos_y = 0;
 
 RubiksCube rubiks_cube;
-
 
 void test_opengl_error(std::string func, std::string file, int line) {
   GLenum err = glGetError();
@@ -283,8 +281,21 @@ void display() {
     TEST_OPENGL_ERROR();
 
     // Pass the cube transformation matrix to the vertex shader
-    GLuint transform_location = glGetUniformLocation(program->program_id, "transform");
-    glUniformMatrix4fv(transform_location, 1, GL_FALSE, glm::value_ptr(rubiks_cube.cubes[i].transform));
+    GLuint transform_location =
+        glGetUniformLocation(program->program_id, "transform");
+    if (rubiks_cube.cubes[i].rotationMatricesInterp.size() == 0)
+      glUniformMatrix4fv(transform_location, 1, GL_FALSE,
+                         glm::value_ptr(rubiks_cube.cubes[i].transform));
+    else {
+      // std::cout << "vec size = "
+      //           << rubiks_cube.cubes[i].rotationMatricesInterp.size()
+      //           << std::endl;
+      glUniformMatrix4fv(
+          transform_location, 1, GL_FALSE,
+          glm::value_ptr(rubiks_cube.cubes[i].rotationMatricesInterp.back()));
+      rubiks_cube.cubes[i].rotationMatricesInterp.pop_back();
+      glutPostRedisplay();
+    }
     TEST_OPENGL_ERROR();
 
     glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size() / 3);
@@ -511,10 +522,10 @@ int main(int argc, char *argv[]) {
   program = init_program();
 
   if (!init_object(program)) throw new std::runtime_error("Object error");
-  
+
   // Set initial camera position
   update_position();
   glutMainLoop();
-  
+
   return 0;
 }
