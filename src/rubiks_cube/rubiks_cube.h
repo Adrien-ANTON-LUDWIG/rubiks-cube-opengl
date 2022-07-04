@@ -13,6 +13,10 @@
 
 #include "cube.h"
 
+#define AXIS_X glm::vec3(1, 0, 0)
+#define AXIS_Y glm::vec3(0, 1, 0)
+#define AXIS_Z glm::vec3(0, 0, 1)
+
 class Cube {
  public:
   glm::vec4 origin_center = glm::vec4(0.0, 0.0, 0.0, 1.0); // Homographic coordinates
@@ -37,6 +41,7 @@ class Cube {
     float angleRad = glm::radians(angle);
     transform = glm::rotate(transform, angleRad, rotationAxis);
     current_center = transform * origin_center;
+    std::cout << glm::to_string(origin_center) << std::endl;
   }
 };
 
@@ -57,6 +62,7 @@ class RubiksCube {
   void translate(GLfloat x, GLfloat y, GLfloat z);
   void rotate(const float angle, const glm::vec3 &rotationAxis);
   void rotate_face();
+  //void rotate_face(glm::vec3 axis);
 
   std::vector<Cube> cubes;
 };

@@ -15,6 +15,7 @@
 
 #include "rubiks_cube/rubiks_cube.h"
 #include "utils/translate.h"
+#include "utils/ascii_table.h"
 
 #define PI 3.14159265358979323846
 #define Z_NEAR 0.5
@@ -470,9 +471,6 @@ void mouse_callback(int button, int, int x, int y) {
   if (button == GLUT_LEFT_BUTTON) {
     old_pos_x = x;
     old_pos_y = y;
-    rubiks_cube.rotate_face();
-    update_position();
-    glutPostRedisplay();
   }
   if (button == 3)
     mouse_wheel_callback(button, -1, x, y);
@@ -485,6 +483,26 @@ void window_resize(int width, int height) {
   // ");TEST_OPENGL_ERROR();" << std::endl;
   glViewport(0, 0, width, height);
   TEST_OPENGL_ERROR();
+}
+
+
+void keyboard_normal_callback(unsigned char key, int x, int y) {
+  switch (key) {
+    case ASCII_ESC:
+      exit(0);
+    case ASCII_R_LOWER:
+      rubiks_cube.rotate_face();
+      update_position();
+      glutPostRedisplay();
+      break;
+    // case ASCII_R_UPPER:
+    //   rubiks_cube.rotate_face(AXIS_Y);
+    //   glutPostRedisplay();
+    //   break;
+  }
+}
+
+void keyboard_special_callback(int key, int x, int y) {
 }
 
 bool init_glut(int &argc, char *argv[]) {
@@ -500,6 +518,8 @@ bool init_glut(int &argc, char *argv[]) {
   glutReshapeFunc(window_resize);
   glutMouseFunc(mouse_callback);
   glutMotionFunc(mouse_motion_callback);
+
+  glutKeyboardFunc(keyboard_normal_callback);
 
   return true;
 }
