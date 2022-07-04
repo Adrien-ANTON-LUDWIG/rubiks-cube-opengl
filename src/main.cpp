@@ -11,272 +11,30 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+#include <iostream>
+
+#include "rubiks_cube/rubiks_cube.h"
+#include "utils/translate.h"
+
+#define PI 3.14159265358979323846
+#define Z_NEAR 0.5
+#define Z_FAR 100
+
 class Program;
 
 Program *program;
-GLuint vao_id;
+std::vector<GLuint> vao_ids(26);
 
-double distance = 17;
-double angle_alpha = 0;
-double angle_beta = 0;
+double distance = 50;
+double angle_alpha = 45 * PI / 180; // 45° to radians
+double angle_beta = 45 * PI / 180; // 45° to radians
 double sky_up = 1;
+
 int old_pos_x = 0;
 int old_pos_y = 0;
 
-std::vector<GLfloat> vertex_buffer_data = {};
+RubiksCube rubiks_cube;
 
-// Our vertices. Three consecutive floats give a 3D vertex; Three consecutive
-// vertices give a triangle. A cube has 6 faces with 2 triangles each, so this
-// makes 6*2=12 triangles, and 12*3 vertices
-static const std::vector<GLfloat> cube_vertex_buffer_data = {
-    // RED
-    -1.0f,
-    -1.0f,
-    -1.0f,
-    -1.0f,
-    -1.0f,
-    1.0f,
-    -1.0f,
-    1.0f,
-    1.0f,
-
-    -1.0f,
-    -1.0f,
-    -1.0f,
-    -1.0f,
-    1.0f,
-    1.0f,
-    -1.0f,
-    1.0f,
-    -1.0f,
-
-    // GREEN
-    1.0f,
-    1.0f,
-    -1.0f,
-    -1.0f,
-    -1.0f,
-    -1.0f,
-    -1.0f,
-    1.0f,
-    -1.0f,
-
-    1.0f,
-    1.0f,
-    -1.0f,
-    1.0f,
-    -1.0f,
-    -1.0f,
-    -1.0f,
-    -1.0f,
-    -1.0f,
-
-    // ORANGE
-    -1.0f,
-    1.0f,
-    1.0f,
-    -1.0f,
-    -1.0f,
-    1.0f,
-    1.0f,
-    -1.0f,
-    1.0f,
-
-    1.0f,
-    1.0f,
-    1.0f,
-    -1.0f,
-    1.0f,
-    1.0f,
-    1.0f,
-    -1.0f,
-    1.0f,
-
-    // BLUE
-    1.0f,
-    -1.0f,
-    -1.0f,
-    1.0f,
-    1.0f,
-    1.0f,
-    1.0f,
-    -1.0f,
-    1.0f,
-
-    1.0f,
-    1.0f,
-    1.0f,
-    1.0f,
-    -1.0f,
-    -1.0f,
-    1.0f,
-    1.0f,
-    -1.0f,
-
-    // YELLOW
-    1.0f,
-    -1.0f,
-    1.0f,
-    -1.0f,
-    -1.0f,
-    -1.0f,
-    1.0f,
-    -1.0f,
-    -1.0f,
-
-    1.0f,
-    -1.0f,
-    1.0f,
-    -1.0f,
-    -1.0f,
-    1.0f,
-    -1.0f,
-    -1.0f,
-    -1.0f,
-
-    // WHITE
-    1.0f,
-    1.0f,
-    1.0f,
-    -1.0f,
-    1.0f,
-    -1.0f,
-    -1.0f,
-    1.0f,
-    1.0f,
-
-    1.0f,
-    1.0f,
-    1.0f,
-    1.0f,
-    1.0f,
-    -1.0f,
-    -1.0f,
-    1.0f,
-    -1.0f,
-};
-
-static const std::vector<GLfloat> cube_color_buffer_data = {
-    // Red
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-
-    // Green
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-
-    // Orange
-    1.0,
-    0.5,
-    0.0,
-    1.0,
-    0.5,
-    0.0,
-    1.0,
-    0.5,
-    0.0,
-    1.0,
-    0.5,
-    0.0,
-    1.0,
-    0.5,
-    0.0,
-    1.0,
-    0.5,
-    0.0,
-
-    // Blue
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-
-    // Yellow
-    1.0,
-    1.0,
-    0.0,
-    1.0,
-    1.0,
-    0.0,
-    1.0,
-    1.0,
-    0.0,
-    1.0,
-    1.0,
-    0.0,
-    1.0,
-    1.0,
-    0.0,
-    1.0,
-    1.0,
-    0.0,
-
-    // White
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-};
 
 void test_opengl_error(std::string func, std::string file, int line) {
   GLenum err = glGetError();
@@ -461,67 +219,55 @@ Program *init_program() {
 }
 
 bool init_object(Program *program) {
-  int max_nb_vbo = 5;
-  int nb_vbo = 0;
-  int index_vbo = 0;
-  GLuint vbo_ids[max_nb_vbo];
+  for (size_t i = 0; i < rubiks_cube.cubes.size(); i++) {
+    int max_nb_vbo = 2;
+    int nb_vbo = 0;
+    int index_vbo = 0;
+    GLuint vbo_ids[max_nb_vbo];
 
-  GLint vertex_location = glGetAttribLocation(program->program_id, "position");
-  TEST_OPENGL_ERROR();
-  // GLint normal_smooth_location = glGetAttribLocation(program->program_id,
-  // "normalSmooth"); TEST_OPENGL_ERROR();
-  GLint color_location = glGetAttribLocation(program->program_id, "color");
-  TEST_OPENGL_ERROR();
+    GLint vertex_location =
+        glGetAttribLocation(program->program_id, "position");
+    TEST_OPENGL_ERROR();
+    GLint color_location = glGetAttribLocation(program->program_id, "color");
+    TEST_OPENGL_ERROR();
 
-  glGenVertexArrays(1, &vao_id);
-  TEST_OPENGL_ERROR();
-  glBindVertexArray(vao_id);
-  TEST_OPENGL_ERROR();
+    glGenVertexArrays(1, &vao_ids[i]);
+    TEST_OPENGL_ERROR();
+    glBindVertexArray(vao_ids[i]);
+    TEST_OPENGL_ERROR();
 
-  if (vertex_location != -1) nb_vbo++;
-  // if (normal_smooth_location != -1) nb_vbo++;
-  if (color_location != -1) nb_vbo++;
-  glGenBuffers(nb_vbo, vbo_ids);
-  TEST_OPENGL_ERROR();
+    if (vertex_location != -1) nb_vbo++;
+    if (color_location != -1) nb_vbo++;
+    glGenBuffers(nb_vbo, vbo_ids);
+    TEST_OPENGL_ERROR();
 
-  if (vertex_location != -1) {
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_ids[index_vbo++]);
-    TEST_OPENGL_ERROR();
-    glBufferData(GL_ARRAY_BUFFER, vertex_buffer_data.size() * sizeof(float),
-                 vertex_buffer_data.data(), GL_STATIC_DRAW);
-    TEST_OPENGL_ERROR();
-    glVertexAttribPointer(vertex_location, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    TEST_OPENGL_ERROR();
-    glEnableVertexAttribArray(vertex_location);
-    TEST_OPENGL_ERROR();
+    if (vertex_location != -1) {
+      glBindBuffer(GL_ARRAY_BUFFER, vbo_ids[index_vbo++]);
+      TEST_OPENGL_ERROR();
+      glBufferData(GL_ARRAY_BUFFER,
+                   rubiks_cube.cubes[i].vertices.size() * sizeof(float),
+                   rubiks_cube.cubes[i].vertices.data(), GL_STATIC_DRAW);
+      TEST_OPENGL_ERROR();
+      glVertexAttribPointer(vertex_location, 3, GL_FLOAT, GL_FALSE, 0, 0);
+      TEST_OPENGL_ERROR();
+      glEnableVertexAttribArray(vertex_location);
+      TEST_OPENGL_ERROR();
+    }
+
+    if (color_location != -1) {
+      glBindBuffer(GL_ARRAY_BUFFER, vbo_ids[index_vbo++]);
+      TEST_OPENGL_ERROR();
+      glBufferData(GL_ARRAY_BUFFER, cube_color.size() * sizeof(float),
+                   cube_color.data(), GL_STATIC_DRAW);
+      TEST_OPENGL_ERROR();
+      glVertexAttribPointer(color_location, 3, GL_FLOAT, GL_FALSE, 0, 0);
+      TEST_OPENGL_ERROR();
+      glEnableVertexAttribArray(color_location);
+      TEST_OPENGL_ERROR();
+    }
+
+    glBindVertexArray(0);
   }
-
-  // if (normal_smooth_location != -1) {
-  //   glBindBuffer(GL_ARRAY_BUFFER, vbo_ids[index_vbo++]);
-  //   TEST_OPENGL_ERROR();
-  //   glBufferData(GL_ARRAY_BUFFER,
-  //                normal_smooth_buffer_data.size() * sizeof(float),
-  //                normal_smooth_buffer_data.data(), GL_STATIC_DRAW);
-  //   TEST_OPENGL_ERROR();
-  //   glVertexAttribPointer(normal_smooth_location, 3, GL_FLOAT, GL_FALSE, 0,
-  //   0); TEST_OPENGL_ERROR();
-  //   glEnableVertexAttribArray(normal_smooth_location);
-  //   TEST_OPENGL_ERROR();
-  // }
-
-  if (color_location != -1) {
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_ids[index_vbo++]);
-    TEST_OPENGL_ERROR();
-    glBufferData(GL_ARRAY_BUFFER, cube_color_buffer_data.size() * sizeof(float),
-                 cube_color_buffer_data.data(), GL_STATIC_DRAW);
-    TEST_OPENGL_ERROR();
-    glVertexAttribPointer(color_location, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    TEST_OPENGL_ERROR();
-    glEnableVertexAttribArray(color_location);
-    TEST_OPENGL_ERROR();
-  }
-
-  glBindVertexArray(0);
   return true;
 }
 
@@ -529,20 +275,21 @@ void display() {
   static int counter = 0;
   counter++;
 
-  // static glm::vec3 red(1.0, 0.0, 0.0);
-  // static glm::vec3 green(0.0, 1.0, 0.0);
-  // static glm::vec3 blue(0.0, 0.0, 1.0);
-  // static glm::vec3 colors[] = {red, green, blue};
-  // GLuint color_location = glGetUniformLocation(program->program_id, "color");
-  // glUniform3fv(color_location, 1, glm::value_ptr(colors[counter % 3]));
-
   glUseProgram(program->program_id);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   TEST_OPENGL_ERROR();
-  glBindVertexArray(vao_id);
-  TEST_OPENGL_ERROR();
-  glDrawArrays(GL_TRIANGLES, 0, vertex_buffer_data.size() / 3);
-  TEST_OPENGL_ERROR();
+  for (size_t i = 0; i < vao_ids.size(); i++) {
+    glBindVertexArray(vao_ids[i]);
+    TEST_OPENGL_ERROR();
+
+    // Pass the cube transformation matrix to the vertex shader
+    GLuint transform_location = glGetUniformLocation(program->program_id, "transform");
+    glUniformMatrix4fv(transform_location, 1, GL_FALSE, glm::value_ptr(rubiks_cube.cubes[i].transform));
+    TEST_OPENGL_ERROR();
+
+    glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size() / 3);
+    TEST_OPENGL_ERROR();
+  }
   glBindVertexArray(0);
   TEST_OPENGL_ERROR();
   glutSwapBuffers();
@@ -669,8 +416,8 @@ void update_position() {
   // std::cout << "model_view_matrix_location " << model_view_matrix_location <<
   // std::endl;
   glUniformMatrix4fv(model_view_matrix_location, 1, GL_TRUE, model_view_matrix);
+  frustum(projection_matrix, -0.05, 0.05, -0.05, 0.05, Z_NEAR, Z_FAR);
 
-  frustum(projection_matrix, -0.05, 0.05, -0.05, 0.05, 0.5, 50);
   GLint projection_matrix_location =
       glGetUniformLocation(program->program_id, "projection_matrix");
   glUniformMatrix4fv(projection_matrix_location, 1, GL_TRUE, projection_matrix);
@@ -679,8 +426,9 @@ void update_position() {
 }
 
 void mouse_motion_callback(int x, int y) {
-  double alpha = angle_alpha - (old_pos_x - x) * M_PI / 50.0;
-  double beta = angle_beta - (old_pos_y - y) * M_PI / 50.0;
+  double alpha = angle_alpha - (old_pos_x - x) * PI / 500.0;
+  double beta = angle_beta - (old_pos_y - y) * PI / 500.0;
+
   double sky;
 
   if (beta > M_PI / 2.0) {
@@ -722,6 +470,9 @@ void mouse_callback(int button, int, int x, int y) {
   if (button == GLUT_LEFT_BUTTON) {
     old_pos_x = x;
     old_pos_y = y;
+    rubiks_cube.rotate_face();
+    update_position();
+    glutPostRedisplay();
   }
   if (button == 3)
     mouse_wheel_callback(button, -1, x, y);
@@ -753,48 +504,17 @@ bool init_glut(int &argc, char *argv[]) {
   return true;
 }
 
-void printVertex(glm::vec3 vertex) {
-  std::cout << "(" << vertex[0] << " " << vertex[1] << " " << vertex[2] << ")";
-}
-
-void printMatrix(glm::mat4 matrix) {
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) std::cout << matrix[i][j] << " ";
-    std::cout << std::endl;
-  }
-}
-std::vector<GLfloat> rotation(std::vector<GLfloat> vertex_buffer_data,
-                              const glm::vec3 &rotationAxis,
-                              const float angle) {
-  float angleRad = glm::radians(angle);
-  glm::mat4 rotationMat = glm::rotate(glm::mat4(1.0f), angleRad, rotationAxis);
-  glm::vec4 vertex = glm::vec4(1.0f);
-  int len = vertex_buffer_data.size();
-  int cpt = 0;
-  for (int i = 0; i < len; i++) {
-    vertex[i % 3] = vertex_buffer_data[i];
-
-    if (cpt == 2) {
-      vertex = rotationMat * vertex;
-
-      for (int j = 0; j < 3; j++) vertex_buffer_data[i - 2 + j] = vertex[j];
-      cpt = 0;
-    } else
-      cpt++;
-  }
-
-  return vertex_buffer_data;
-}
-
 int main(int argc, char *argv[]) {
   if (!init_glut(argc, argv)) throw new std::runtime_error("Glut error");
   if (!init_glew()) throw new std::runtime_error("Glew error");
   if (!init_GL()) throw new std::runtime_error("Gl error");
   program = init_program();
-  // make_cylinder(1.0, 0.0, 2.0);
-  vertex_buffer_data = cube_vertex_buffer_data;
-  vertex_buffer_data = rotation(vertex_buffer_data, glm::vec3(1, 0, 0), 90.0f);
+
   if (!init_object(program)) throw new std::runtime_error("Object error");
+  
+  // Set initial camera position
+  update_position();
   glutMainLoop();
+  
   return 0;
 }
