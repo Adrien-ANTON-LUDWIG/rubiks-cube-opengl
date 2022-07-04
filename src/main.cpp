@@ -11,13 +11,12 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
-
 #include <iostream>
 
 #include "rubiks_cube/rubiks_cube.h"
 #include "utils/translate.h"
 
-# define PI 3.14159265358979323846
+#define PI 3.14159265358979323846
 #define Z_NEAR 0.5
 #define Z_FAR 100
 
@@ -35,6 +34,7 @@ int old_pos_x = 0;
 int old_pos_y = 0;
 
 RubiksCube rubiks_cube;
+
 
 void test_opengl_error(std::string func, std::string file, int line) {
   GLenum err = glGetError();
@@ -268,7 +268,6 @@ bool init_object(Program *program) {
 
     glBindVertexArray(0);
   }
-
   return true;
 }
 
@@ -276,11 +275,9 @@ void display() {
   static int counter = 0;
   counter++;
 
-
   glUseProgram(program->program_id);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   TEST_OPENGL_ERROR();
-
   for (size_t i = 0; i < vao_ids.size(); i++) {
     glBindVertexArray(vao_ids[i]);
     TEST_OPENGL_ERROR();
@@ -419,8 +416,8 @@ void update_position() {
   // std::cout << "model_view_matrix_location " << model_view_matrix_location <<
   // std::endl;
   glUniformMatrix4fv(model_view_matrix_location, 1, GL_TRUE, model_view_matrix);
-
   frustum(projection_matrix, -0.05, 0.05, -0.05, 0.05, Z_NEAR, Z_FAR);
+
   GLint projection_matrix_location =
       glGetUniformLocation(program->program_id, "projection_matrix");
   glUniformMatrix4fv(projection_matrix_location, 1, GL_TRUE, projection_matrix);
@@ -429,8 +426,9 @@ void update_position() {
 }
 
 void mouse_motion_callback(int x, int y) {
-  double alpha = angle_alpha - (old_pos_x - x) * M_PI / 500.0;
-  double beta = angle_beta - (old_pos_y - y) * M_PI / 500.0;
+  double alpha = angle_alpha - (old_pos_x - x) * PI / 500.0;
+  double beta = angle_beta - (old_pos_y - y) * PI / 500.0;
+
   double sky;
 
   if (beta > M_PI / 2.0) {
@@ -513,10 +511,10 @@ int main(int argc, char *argv[]) {
   program = init_program();
 
   if (!init_object(program)) throw new std::runtime_error("Object error");
-
+  
+  // Set initial camera position
   update_position();
-
   glutMainLoop();
-
+  
   return 0;
 }
