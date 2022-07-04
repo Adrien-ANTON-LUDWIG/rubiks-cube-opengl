@@ -56,6 +56,7 @@ class RubiksCube {
 
   void translate(GLfloat x, GLfloat y, GLfloat z);
   void rotate(const float angle, const glm::vec3 &rotationAxis);
+  void rotate_face();
 
   std::vector<Cube> cubes;
 };
