@@ -11,10 +11,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
-#include <iostream>
 
+#include "io/keyboard.h"
 #include "rubiks_cube/rubiks_cube.h"
-#include "utils/translate.h"
 
 #define PI 3.14159265358979323846
 #define Z_NEAR 0.5
@@ -26,15 +25,12 @@ Program *program;
 std::vector<GLuint> vao_ids(26);
 
 double distance = 50;
-double angle_alpha = 45 * PI / 180; // 45° to radians
-double angle_beta = 45 * PI / 180; // 45° to radians
+double angle_alpha = 45 * PI / 180;  // 45° to radians
+double angle_beta = 45 * PI / 180;   // 45° to radians
 double sky_up = 1;
 
 int old_pos_x = 0;
 int old_pos_y = 0;
-
-RubiksCube rubiks_cube;
-
 
 void test_opengl_error(std::string func, std::string file, int line) {
   GLenum err = glGetError();
@@ -283,8 +279,10 @@ void display() {
     TEST_OPENGL_ERROR();
 
     // Pass the cube transformation matrix to the vertex shader
-    GLuint transform_location = glGetUniformLocation(program->program_id, "transform");
-    glUniformMatrix4fv(transform_location, 1, GL_FALSE, glm::value_ptr(rubiks_cube.cubes[i].transform));
+    GLuint transform_location =
+        glGetUniformLocation(program->program_id, "transform");
+    glUniformMatrix4fv(transform_location, 1, GL_FALSE,
+                       glm::value_ptr(rubiks_cube.cubes[i].transform));
     TEST_OPENGL_ERROR();
 
     glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size() / 3);
@@ -470,9 +468,6 @@ void mouse_callback(int button, int, int x, int y) {
   if (button == GLUT_LEFT_BUTTON) {
     old_pos_x = x;
     old_pos_y = y;
-    rubiks_cube.rotate_face();
-    update_position();
-    glutPostRedisplay();
   }
   if (button == 3)
     mouse_wheel_callback(button, -1, x, y);
@@ -501,6 +496,8 @@ bool init_glut(int &argc, char *argv[]) {
   glutMouseFunc(mouse_callback);
   glutMotionFunc(mouse_motion_callback);
 
+  glutKeyboardFunc(keyboard_normal_callback);
+
   return true;
 }
 
@@ -511,10 +508,10 @@ int main(int argc, char *argv[]) {
   program = init_program();
 
   if (!init_object(program)) throw new std::runtime_error("Object error");
-  
+
   // Set initial camera position
   update_position();
   glutMainLoop();
-  
+
   return 0;
 }
