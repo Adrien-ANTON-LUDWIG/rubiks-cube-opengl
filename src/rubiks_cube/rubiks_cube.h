@@ -2,6 +2,8 @@
 
 #include <GL/freeglut.h>
 
+#include <chrono>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -103,8 +105,11 @@ class RubiksCube {
   void translate(GLfloat x, GLfloat y, GLfloat z);
   void rotate(const float angle, const glm::vec3 &rotationAxis);
   void rotate_face(float angle, glm::vec3 axis);
+  float update_status();
 
   std::vector<Cube> cubes;
+  std::chrono::steady_clock::time_point begin;
+  bool rotating = false;
 };
 
 static RubiksCube rubiks_cube;

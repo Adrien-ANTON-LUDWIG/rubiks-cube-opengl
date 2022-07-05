@@ -72,10 +72,7 @@ void display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   TEST_OPENGL_ERROR();
 
-  std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-  auto elapsed =
-      std::chrono::duration_cast<std::chrono::milliseconds>(now - begin)
-          .count();
+  auto elapsed = rubiks_cube.update_status();
 
   for (size_t i = 0; i < vao_ids.size(); i++) {
     glBindVertexArray(vao_ids[i]);
@@ -97,7 +94,7 @@ void display() {
   TEST_OPENGL_ERROR();
   glutSwapBuffers();
 
-  if (elapsed < DURATION) {
+  if (rubiks_cube.rotating) {
     glutPostRedisplay();
     TEST_OPENGL_ERROR();
   }

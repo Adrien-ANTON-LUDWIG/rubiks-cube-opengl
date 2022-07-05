@@ -1,14 +1,10 @@
 #pragma once
 
-#include <chrono>
-
 #include "../rubiks_cube/rubiks_cube.h"
 #include "../utils/ascii_table.h"
 
-std::chrono::steady_clock::time_point begin;
-
 void keyboard_normal_callback(unsigned char key, int x, int y) {
-  begin = std::chrono::steady_clock::now(); // FIXME
+  if (rubiks_cube.rotating) return;
 
   x = x;  // Avoid unused variable warning
   y = y;  // Avoid unused variable warning
