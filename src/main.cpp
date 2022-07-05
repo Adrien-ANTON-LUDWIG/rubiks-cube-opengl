@@ -4,6 +4,7 @@
 #include <GL/freeglut.h>
 #include <string.h>
 
+#include <chrono>
 #include <fstream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -31,6 +32,8 @@ double sky_up = 1;
 
 int old_pos_x = 0;
 int old_pos_y = 0;
+
+std::chrono::steady_clock::time_point begin;
 
 RubiksCube rubiks_cube;
 
@@ -276,6 +279,12 @@ void display() {
   glUseProgram(program->program_id);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   TEST_OPENGL_ERROR();
+
+  std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+  auto elapsed =
+      std::chrono::duration_cast<std::chrono::milliseconds>(now - begin)
+          .count();
+
   for (size_t i = 0; i < vao_ids.size(); i++) {
     glBindVertexArray(vao_ids[i]);
     TEST_OPENGL_ERROR();
@@ -283,27 +292,23 @@ void display() {
     // Pass the cube transformation matrix to the vertex shader
     GLuint transform_location =
         glGetUniformLocation(program->program_id, "transform");
-    if (rubiks_cube.cubes[i].rotationMatricesInterp.size() == 0)
-      glUniformMatrix4fv(transform_location, 1, GL_FALSE,
-                         glm::value_ptr(rubiks_cube.cubes[i].transform));
-    else {
-      // std::cout << "vec size = "
-      //           << rubiks_cube.cubes[i].rotationMatricesInterp.size()
-      //           << std::endl;
-      glUniformMatrix4fv(
-          transform_location, 1, GL_FALSE,
-          glm::value_ptr(rubiks_cube.cubes[i].rotationMatricesInterp.back()));
-      rubiks_cube.cubes[i].rotationMatricesInterp.pop_back();
-      glutPostRedisplay();
-    }
-    TEST_OPENGL_ERROR();
+
+    glUniformMatrix4fv(
+        transform_location, 1, GL_FALSE,
+        glm::value_ptr(rubiks_cube.cubes[i].get_transform(elapsed)));
 
     glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size() / 3);
     TEST_OPENGL_ERROR();
   }
+
   glBindVertexArray(0);
   TEST_OPENGL_ERROR();
   glutSwapBuffers();
+
+  if (elapsed < DURATION) {
+    glutPostRedisplay();
+    TEST_OPENGL_ERROR();
+  }
 }
 
 void frustum(GLfloat data[16], const float &left, const float &right,
@@ -482,6 +487,13 @@ void mouse_callback(int button, int, int x, int y) {
     old_pos_x = x;
     old_pos_y = y;
     rubiks_cube.rotate_face();
+
+    begin = std::chrono::steady_clock::now();
+    // std::chrono::steady_clock::time_point end =
+    // std::chrono::steady_clock::now(); std::cout << "time = " <<
+    // std::chrono::duration_cast<std::chrono::milliseconds>(end -
+    // begin).count() << std::endl; begin = end;
+
     update_position();
     glutPostRedisplay();
   }
@@ -516,6 +528,8 @@ bool init_glut(int &argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
+  begin = std::chrono::steady_clock::now();
+
   if (!init_glut(argc, argv)) throw new std::runtime_error("Glut error");
   if (!init_glew()) throw new std::runtime_error("Glew error");
   if (!init_GL()) throw new std::runtime_error("Gl error");
