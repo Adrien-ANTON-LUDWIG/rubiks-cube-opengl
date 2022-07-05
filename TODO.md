@@ -13,3 +13,4 @@ These are some things to update or implement in the future (no priority):
 * Reset viewing angle
 * Reset rubik's cube original state
 * Scramble
+* Rotations using mouse
