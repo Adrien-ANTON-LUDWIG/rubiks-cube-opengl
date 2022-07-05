@@ -73,4 +73,4 @@ class RubiksCube {
   std::vector<Cube> cubes;
 };
 
-RubiksCube rubiks_cube;
+static RubiksCube rubiks_cube;
