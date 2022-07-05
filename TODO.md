@@ -10,10 +10,10 @@ These are some things to update or implement in the future (no priority):
     * Rubik's cube
     * Skybox
 * Smooth rotation
-* Reset rubik's cube original state
 * Scramble
 * Rotations using mouse
 
 ## Done
 
- * Reset viewing angle
+* Reset viewing angle
+* Reset rubik's cube original state

@@ -20,6 +20,12 @@ void keyboard_normal_callback(unsigned char key, int x, int y) {
         glutPostRedisplay();
         break;
 
+    // Reset rubik's cube original state
+    case ASCII_CR:
+        rubiks_cube = RubiksCube();
+        glutPostRedisplay();
+        break;
+
     // Mouvements de base //
 
     // Right
