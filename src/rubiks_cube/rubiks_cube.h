@@ -15,6 +15,17 @@
 
 #define DURATION 600.0f  // In milliseconds (=1s)
 
+#define AXIS_X glm::vec3(1, 0, 0)
+#define AXIS_Y glm::vec3(0, 1, 0)
+#define AXIS_Z glm::vec3(0, 0, 1)
+
+#define ANGLE_CLOCKWISE 90
+#define ANGLE_COUNTER_CLOCKWISE -90
+
+inline void print_matrix(glm::mat4 m) {
+  for (int i = 0; i < 4; i++) std::cout << glm::to_string(m[i]) << std::endl;
+}
+
 class Cube {
  public:
   glm::vec4 origin_center =
@@ -91,7 +102,9 @@ class RubiksCube {
 
   void translate(GLfloat x, GLfloat y, GLfloat z);
   void rotate(const float angle, const glm::vec3 &rotationAxis);
-  void rotate_face();
+  void rotate_face(float angle, glm::vec3 axis);
 
   std::vector<Cube> cubes;
 };
+
+static RubiksCube rubiks_cube;
