@@ -57,7 +57,7 @@ class Cube {
     // position. We compute the steps between the last
     // position and the current position.
     glm::mat4 interpTransform =
-        glm::rotate(transform, glm::radians( - last_angle + angle), last_axis);
+        glm::rotate(glm::mat4(1.0f), glm::radians( - last_angle + angle), last_axis) * transform;
 
     return interpTransform;
   }
@@ -70,7 +70,7 @@ class Cube {
 
     // Compute new transform matrix for rotation
     float angleRad = glm::radians(angle);
-    transform = glm::rotate(transform, angleRad, rotation_axis);
+    transform = glm::rotate(glm::mat4(1.0f), angleRad, rotation_axis) * transform;
     current_center = transform * origin_center;
   }
 };
