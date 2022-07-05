@@ -39,9 +39,8 @@ class Cube {
 
   void rotate(const float angle, const glm::vec3 &rotationAxis) {
     float angleRad = glm::radians(angle);
-    transform = glm::rotate(transform, angleRad, rotationAxis);
+    transform = glm::rotate(glm::mat4(1.0), angleRad, rotationAxis) * transform;
     current_center = transform * origin_center;
-    std::cout << glm::to_string(origin_center) << std::endl;
   }
 };
 
