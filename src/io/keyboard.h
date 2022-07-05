@@ -12,6 +12,14 @@ void keyboard_normal_callback(unsigned char key, int x, int y) {
     case ASCII_ESC:
       exit(0);
 
+    // Reset view angle
+    case ASCII_SPACE:
+        angle_alpha = INITIAL_ANGLE_ALPHA;
+        angle_beta = INITIAL_ANGLE_BETA;
+        update_position();
+        glutPostRedisplay();
+        break;
+
     // Mouvements de base //
 
     // Right
