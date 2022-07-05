@@ -17,23 +17,10 @@ void RubiksCube::rotate(const float angle, const glm::vec3 &rotationAxis) {
     cubes[i].rotate(angle, rotationAxis);
 }
 
-void RubiksCube::rotate_face() {
-  std::cout << "Rotating" << std::endl;
+void RubiksCube::rotate_face(float angle, glm::vec3 axis) {
+  glm::vec4 axis4 = glm::vec4(axis, 0);
   for (size_t i = 0; i < cubes.size(); i++) {
-    std::cout << "RC: " << glm::to_string(cubes[i].current_center) << std::endl;
-    if (my_float_comparison(cubes[i].current_center.x, 2.0))
-        cubes[i].rotate(90, glm::vec3(1, 0, 0));
+    float axis_value = glm::dot(cubes[i].current_center, axis4);
+    if (my_float_comparison(axis_value, 2.0)) cubes[i].rotate(angle, axis);
   }
 }
-
-// void RubiksCube::rotate_face(glm::vec3 axis) {
-  // std::cout << "Rotating";
-  // glm::vec4 axis4 = glm::vec4(axis, 0);
-  // for (size_t i = 0; i < cubes.size(); i++) {
-    // float axis_value = glm::dot(cubes[i].current_center, axis4);
-    // std::cout << axis_value << std::endl;
-    // if (my_float_comparison(axis_value, 2.0))
-      // cubes[i].rotate(90, axis);
-  // }
-// }
-// 

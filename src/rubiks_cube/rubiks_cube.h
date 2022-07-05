@@ -6,7 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
- 
+
 // Debug
 #include <glm/gtx/string_cast.hpp>
 #include <iostream>
@@ -17,9 +17,17 @@
 #define AXIS_Y glm::vec3(0, 1, 0)
 #define AXIS_Z glm::vec3(0, 0, 1)
 
+#define ANGLE_CLOCKWISE 90
+#define ANGLE_COUNTER_CLOCKWISE -90
+
+inline void print_matrix(glm::mat4 m) {
+  for (int i = 0; i < 4; i++) std::cout << glm::to_string(m[i]) << std::endl;
+}
+
 class Cube {
  public:
-  glm::vec4 origin_center = glm::vec4(0.0, 0.0, 0.0, 1.0); // Homographic coordinates
+  glm::vec4 origin_center =
+      glm::vec4(0.0, 0.0, 0.0, 1.0);  // Homographic coordinates
   glm::vec4 current_center = origin_center;
   glm::mat4 transform = glm::mat4(1.0f);
   std::vector<GLfloat> vertices = cube_vertices;
@@ -60,8 +68,7 @@ class RubiksCube {
 
   void translate(GLfloat x, GLfloat y, GLfloat z);
   void rotate(const float angle, const glm::vec3 &rotationAxis);
-  void rotate_face();
-  //void rotate_face(glm::vec3 axis);
+  void rotate_face(float angle, glm::vec3 axis);
 
   std::vector<Cube> cubes;
 };
