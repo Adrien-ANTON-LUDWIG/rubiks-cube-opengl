@@ -4,6 +4,8 @@
 #include "../utils/ascii_table.h"
 
 void keyboard_normal_callback(unsigned char key, int x, int y) {
+  if (rubiks_cube.rotating) return;
+
   x = x;  // Avoid unused variable warning
   y = y;  // Avoid unused variable warning
 

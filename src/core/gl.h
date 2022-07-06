@@ -71,6 +71,9 @@ void display() {
   glUseProgram(program->program_id);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   TEST_OPENGL_ERROR();
+
+  auto elapsed = rubiks_cube.update_status();
+
   for (size_t i = 0; i < vao_ids.size(); i++) {
     glBindVertexArray(vao_ids[i]);
     TEST_OPENGL_ERROR();
@@ -78,16 +81,23 @@ void display() {
     // Pass the cube transformation matrix to the vertex shader
     GLuint transform_location =
         glGetUniformLocation(program->program_id, "transform");
-    glUniformMatrix4fv(transform_location, 1, GL_FALSE,
-                       glm::value_ptr(rubiks_cube.cubes[i].transform));
-    TEST_OPENGL_ERROR();
+
+    glUniformMatrix4fv(
+        transform_location, 1, GL_FALSE,
+        glm::value_ptr(rubiks_cube.cubes[i].get_transform(elapsed)));
 
     glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size() / 3);
     TEST_OPENGL_ERROR();
   }
+
   glBindVertexArray(0);
   TEST_OPENGL_ERROR();
   glutSwapBuffers();
+
+  if (rubiks_cube.rotating) {
+    glutPostRedisplay();
+    TEST_OPENGL_ERROR();
+  }
 }
 
 void window_resize(int width, int height) {
