@@ -10,6 +10,7 @@ These are some things to update or implement in the future (no priority):
     * Skybox
 * Scramble
 * Rotations using mouse
+* Visual aid for keyboard inputs
 
 ## Done
 
