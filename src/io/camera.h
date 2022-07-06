@@ -12,6 +12,7 @@ double distance = 50;
 double angle_alpha = INITIAL_ANGLE_ALPHA;
 double angle_beta = INITIAL_ANGLE_BETA;
 double sky_up = 1;
+glm::vec4 camera_position;
 
 int old_pos_x = 0;
 int old_pos_y = 0;
@@ -109,6 +110,7 @@ void update_position() {
   double p0 = distance * cos(angle_alpha) * cos(angle_beta);
   double p1 = distance * sin(angle_beta);
   double p2 = distance * sin(angle_alpha) * cos(angle_beta);
+  camera_position = glm::vec4(p0, p1, p2, 1.0);
 
   look_at(model_view_matrix, p0, p1, p2, 0, 0, 0, 0, sky_up, 0);
   glUseProgram(program->program_id);
