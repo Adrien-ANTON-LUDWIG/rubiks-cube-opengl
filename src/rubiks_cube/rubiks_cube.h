@@ -35,6 +35,7 @@ class Cube {
   glm::mat4 transform = glm::mat4(1.0f);
   std::vector<GLfloat> vertices = cube_vertices;
   bool rotating = false;
+  GLuint vao_id;
 
   glm::vec3 last_axis = glm::vec3(0.0f);
   float last_angle = 0;

@@ -28,6 +28,7 @@ bool init_object(Program *program) {
     TEST_OPENGL_ERROR();
     glBindVertexArray(vao_ids[i]);
     TEST_OPENGL_ERROR();
+    rubiks_cube.cubes[i].vao_id = vao_ids[i];
 
     if (vertex_location != -1) nb_vbo++;
     if (color_location != -1) nb_vbo++;
