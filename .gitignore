@@ -33,7 +33,7 @@
 
 # Images
 images
-*.ong
+*.png
 *.jpg
 
 # Vscode
@@ -41,3 +41,6 @@ images
 
 # Binaries
 rubiks-cube-opengl
+
+# Texture
+textures
