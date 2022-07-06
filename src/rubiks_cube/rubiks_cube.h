@@ -60,6 +60,7 @@ class Cube {
 
     if (elapsed >= DURATION) {
       rotating = false;
+      current_center = transform * origin_center;
       return transform;
     }
 
@@ -73,6 +74,7 @@ class Cube {
         glm::rotate(glm::mat4(1.0f), glm::radians(-last_angle + angle),
                     last_axis) *
         transform;
+    current_center = interpTransform * origin_center;
 
     return interpTransform;
   }
