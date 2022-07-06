@@ -9,8 +9,6 @@
 
 #define PI 3.14159265358979323846
 
-std::vector<GLuint> vao_ids(26);
-
 bool init_object(Program *program) {
   for (size_t i = 0; i < rubiks_cube.cubes.size(); i++) {
     int max_nb_vbo = 2;
@@ -24,9 +22,9 @@ bool init_object(Program *program) {
     GLint color_location = glGetAttribLocation(program->program_id, "color");
     TEST_OPENGL_ERROR();
 
-    glGenVertexArrays(1, &vao_ids[i]);
+    glGenVertexArrays(1, &rubiks_cube.cubes[i].vao_id);
     TEST_OPENGL_ERROR();
-    glBindVertexArray(vao_ids[i]);
+    glBindVertexArray(rubiks_cube.cubes[i].vao_id);
     TEST_OPENGL_ERROR();
 
     if (vertex_location != -1) nb_vbo++;
@@ -64,6 +62,16 @@ bool init_object(Program *program) {
   return true;
 }
 
+#include <algorithm>
+
+struct compare_cube {
+  // Comparator to sort in reverse order
+  inline bool operator()(const Cube &cube1, const Cube &cube2) const {
+    return (glm::length(camera_position - cube1.current_center) >
+            glm::length(camera_position - cube2.current_center));
+  }
+};
+
 void display() {
   static int counter = 0;
   counter++;
@@ -72,19 +80,27 @@ void display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   TEST_OPENGL_ERROR();
 
+  // Sort cubes to draw them from the farthest to the closest.
+  std::sort(rubiks_cube.cubes.begin(), rubiks_cube.cubes.end(), compare_cube());
+
   auto elapsed = rubiks_cube.update_status();
 
-  for (size_t i = 0; i < vao_ids.size(); i++) {
-    glBindVertexArray(vao_ids[i]);
+  // Draw front faces
+  for (size_t i = 0; i < rubiks_cube.cubes.size(); i++) {
+    glBindVertexArray(rubiks_cube.cubes[i].vao_id);
     TEST_OPENGL_ERROR();
 
     // Pass the cube transformation matrix to the vertex shader
     GLuint transform_location =
         glGetUniformLocation(program->program_id, "transform");
-
     glUniformMatrix4fv(
         transform_location, 1, GL_FALSE,
         glm::value_ptr(rubiks_cube.cubes[i].get_transform(elapsed)));
+
+    // Pass the cube opacity
+    GLuint opacity_location =
+        glGetUniformLocation(program->program_id, "opacity");
+    glUniform1f(opacity_location, rubiks_cube.opacity);
 
     glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size() / 3);
     TEST_OPENGL_ERROR();
@@ -122,6 +138,32 @@ bool init_glut(int &argc, char *argv[]) {
   glutMotionFunc(mouse_motion_callback);
 
   glutKeyboardFunc(keyboard_normal_callback);
+
+  return true;
+}
+
+bool init_glew() { return (glewInit() == GLEW_OK); }
+
+bool init_GL() {
+  // Enable Depth test at init because we start with an opaque cube
+  glEnable(GL_DEPTH_TEST);
+  TEST_OPENGL_ERROR();
+
+  // Set background color
+  glClearColor(0.4, 0.4, 0.4, 1.0);
+  TEST_OPENGL_ERROR();
+
+  // Enable blending
+  glEnable(GL_BLEND);
+  TEST_OPENGL_ERROR();
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  TEST_OPENGL_ERROR();
+
+  // Backface culling
+  glEnable(GL_CULL_FACE);
+  TEST_OPENGL_ERROR();
+  glCullFace(GL_BACK);
+  TEST_OPENGL_ERROR();
 
   return true;
 }

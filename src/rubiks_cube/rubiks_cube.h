@@ -3,7 +3,6 @@
 #include <GL/freeglut.h>
 
 #include <chrono>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -36,6 +35,7 @@ class Cube {
   glm::mat4 transform = glm::mat4(1.0f);
   std::vector<GLfloat> vertices = cube_vertices;
   bool rotating = false;
+  GLuint vao_id;
 
   glm::vec3 last_axis = glm::vec3(0.0f);
   float last_angle = 0;
@@ -60,6 +60,7 @@ class Cube {
 
     if (elapsed >= DURATION) {
       rotating = false;
+      current_center = transform * origin_center;
       return transform;
     }
 
@@ -70,7 +71,10 @@ class Cube {
     // position. We compute the steps between the last
     // position and the current position.
     glm::mat4 interpTransform =
-        glm::rotate(glm::mat4(1.0f), glm::radians( - last_angle + angle), last_axis) * transform;
+        glm::rotate(glm::mat4(1.0f), glm::radians(-last_angle + angle),
+                    last_axis) *
+        transform;
+    current_center = interpTransform * origin_center;
 
     return interpTransform;
   }
@@ -83,7 +87,8 @@ class Cube {
 
     // Compute new transform matrix for rotation
     float angleRad = glm::radians(angle);
-    transform = glm::rotate(glm::mat4(1.0f), angleRad, rotation_axis) * transform;
+    transform =
+        glm::rotate(glm::mat4(1.0f), angleRad, rotation_axis) * transform;
     current_center = transform * origin_center;
   }
 };
@@ -110,6 +115,7 @@ class RubiksCube {
   std::vector<Cube> cubes;
   std::chrono::steady_clock::time_point begin;
   bool rotating = false;
+  float opacity = 1.0;
 };
 
 static RubiksCube rubiks_cube;

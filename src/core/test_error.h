@@ -56,12 +56,3 @@ void test_opengl_error(std::string func, std::string file, int line) {
     test_opengl_error(__func__, __FILE__, __LINE__); \
   } while (0)
 
-bool init_glew() { return (glewInit() == GLEW_OK); }
-
-bool init_GL() {
-  glEnable(GL_DEPTH_TEST);
-  TEST_OPENGL_ERROR();
-  glClearColor(0.4, 0.4, 0.4, 1.0);
-  TEST_OPENGL_ERROR();
-  return true;
-}
