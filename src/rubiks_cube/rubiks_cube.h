@@ -40,6 +40,11 @@ class Cube {
   glm::vec3 last_axis = glm::vec3(0.0f);
   float last_angle = 0;
 
+  void reset() {
+    current_center = origin_center;
+    transform = glm::mat4(1.0f);
+  }
+
   void translate(GLfloat x, GLfloat y, GLfloat z) {
     for (size_t i = 0; i < vertices.size(); i += 3) {
       vertices[i] += x;
@@ -111,6 +116,7 @@ class RubiksCube {
   void rotate(const float angle, const glm::vec3 &rotationAxis);
   void rotate_face(float angle, glm::vec3 axis);
   float update_status();
+  void reset();
 
   std::vector<Cube> cubes;
   std::chrono::steady_clock::time_point begin;

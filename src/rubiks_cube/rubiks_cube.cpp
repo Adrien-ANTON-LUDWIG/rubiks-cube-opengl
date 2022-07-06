@@ -38,3 +38,8 @@ float RubiksCube::update_status() {
 
   return elapsed;
 }
+
+void RubiksCube::reset() {
+  for (size_t i = 0; i < cubes.size(); i++)
+    cubes[i].reset();
+}

@@ -23,7 +23,7 @@ void keyboard_normal_callback(unsigned char key, int x, int y) {
 
     // Reset rubik's cube original state
     case ASCII_CR:
-      rubiks_cube = RubiksCube();
+      rubiks_cube.reset();
       break;
 
     // Reset rubik's cube original state
