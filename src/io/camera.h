@@ -4,7 +4,7 @@
 
 #define PI 3.14159265358979323846
 #define Z_NEAR 0.5
-#define Z_FAR 100
+#define Z_FAR 200
 #define INITIAL_ANGLE_ALPHA 45 * PI / 180  // 45° to radians
 #define INITIAL_ANGLE_BETA 45 * PI / 180  // 45° to radians
 
