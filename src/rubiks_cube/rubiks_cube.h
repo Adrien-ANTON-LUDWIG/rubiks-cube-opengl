@@ -106,10 +106,15 @@ class RubiksCube {
   void rotate(const float angle, const glm::vec3 &rotationAxis);
   void rotate_face(float angle, glm::vec3 axis);
   float update_status();
+  int get_next_texture_id();
 
   std::vector<Cube> cubes;
   std::chrono::steady_clock::time_point begin;
   bool rotating = false;
+  std::vector<int> texture_ids;
+  
+private:
+  int current_texture_id = -1;
 };
 
 static RubiksCube rubiks_cube;

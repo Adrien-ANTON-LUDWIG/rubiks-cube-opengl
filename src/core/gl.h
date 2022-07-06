@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glob.h>
+
 #include "../io/camera.h"
 #include "../io/keyboard.h"
 #include "../io/mouse.h"
@@ -11,48 +13,55 @@ extern "C" {
 #define STB_IMAGE_IMPLEMENTATION
 #include "../libs/stb_image.h"
 }
+
 #define PI 3.14159265358979323846
+#define GLOB_TEXTURES "./textures/*"
 
 std::vector<GLuint> vao_ids(26);
+
 
 void init_textures() {
   // load and generate texture
   int width;
   int height;
   int channels;
-  stbi_set_flip_vertically_on_load(true);
-  unsigned char *data =
-      stbi_load("textures/debug.png", &width, &height, &channels, 0);
 
-  if (!data) {
-    std::cout << "Failed to load texture.\n";
-    throw;
+  glob_t glob_result;
+  glob(GLOB_TEXTURES, GLOB_TILDE, NULL, &glob_result);
+  for (unsigned int i = 0; i < glob_result.gl_pathc; ++i) {
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char *data =
+        stbi_load(glob_result.gl_pathv[i], &width, &height, &channels, 0);
+
+    if (!data) {
+      std::cout << "Failed to load texture.\n";
+      throw;
+    }
+
+    unsigned int texture_id;
+    glGenTextures(1, &texture_id);
+    TEST_OPENGL_ERROR();
+
+    rubiks_cube.texture_ids.push_back(texture_id);
+
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                 GL_UNSIGNED_BYTE, data);
+    TEST_OPENGL_ERROR();
+    glGenerateMipmap(GL_TEXTURE_2D);
+    TEST_OPENGL_ERROR();
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    TEST_OPENGL_ERROR();
+
+    stbi_image_free(data);
   }
 
-  unsigned int texture;
-  glGenTextures(1, &texture);
-  TEST_OPENGL_ERROR();
-  glBindTexture(GL_TEXTURE_2D, texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-               GL_UNSIGNED_BYTE, data);
-  TEST_OPENGL_ERROR();
-  glGenerateMipmap(GL_TEXTURE_2D);
-  TEST_OPENGL_ERROR();
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  TEST_OPENGL_ERROR();
-
-  GLint tex_location =
-      glGetUniformLocation(program->program_id, "texture_sampler");
-  TEST_OPENGL_ERROR();
-  glUniform1i(tex_location, 0);
-  TEST_OPENGL_ERROR();
-
-  stbi_image_free(data);
+  active_texture(rubiks_cube.get_next_texture_id());
 }
 
 bool init_object(Program *program) {
