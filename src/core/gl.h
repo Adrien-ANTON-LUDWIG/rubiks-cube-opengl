@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glob.h>
+
 #include "../io/camera.h"
 #include "../io/keyboard.h"
 #include "../io/mouse.h"
@@ -7,11 +9,61 @@
 #include "program.h"
 #include "test_error.h"
 
+extern "C" {
+#define STB_IMAGE_IMPLEMENTATION
+#include "../libs/stb_image.h"
+}
+
 #define PI 3.14159265358979323846
+#define GLOB_TEXTURES "./textures/*"
+
+void init_textures() {
+  // load and generate texture
+  int width;
+  int height;
+  int channels;
+
+  glob_t glob_result;
+  glob(GLOB_TEXTURES, GLOB_TILDE, NULL, &glob_result);
+  for (unsigned int i = 0; i < glob_result.gl_pathc; ++i) {
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char *data =
+        stbi_load(glob_result.gl_pathv[i], &width, &height, &channels, 0);
+
+    if (!data) {
+      std::cout << "Failed to load texture.\n";
+      throw;
+    }
+
+    unsigned int texture_id;
+    glGenTextures(1, &texture_id);
+    TEST_OPENGL_ERROR();
+
+    rubiks_cube.texture_ids.push_back(texture_id);
+
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                 GL_UNSIGNED_BYTE, data);
+    TEST_OPENGL_ERROR();
+    glGenerateMipmap(GL_TEXTURE_2D);
+    TEST_OPENGL_ERROR();
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    TEST_OPENGL_ERROR();
+
+    stbi_image_free(data);
+  }
+
+  active_texture(rubiks_cube.get_next_texture_id());
+}
 
 bool init_object(Program *program) {
   for (size_t i = 0; i < rubiks_cube.cubes.size(); i++) {
-    int max_nb_vbo = 2;
+    int max_nb_vbo = 3;
     int nb_vbo = 0;
     int index_vbo = 0;
     GLuint vbo_ids[max_nb_vbo];
@@ -21,6 +73,8 @@ bool init_object(Program *program) {
     TEST_OPENGL_ERROR();
     GLint color_location = glGetAttribLocation(program->program_id, "color");
     TEST_OPENGL_ERROR();
+    GLint texture_location = glGetAttribLocation(program->program_id, "uv");
+    TEST_OPENGL_ERROR();
 
     glGenVertexArrays(1, &rubiks_cube.cubes[i].vao_id);
     TEST_OPENGL_ERROR();
@@ -29,6 +83,7 @@ bool init_object(Program *program) {
 
     if (vertex_location != -1) nb_vbo++;
     if (color_location != -1) nb_vbo++;
+    if (texture_location != -1) nb_vbo++;
     glGenBuffers(nb_vbo, vbo_ids);
     TEST_OPENGL_ERROR();
 
@@ -54,6 +109,18 @@ bool init_object(Program *program) {
       glVertexAttribPointer(color_location, 3, GL_FLOAT, GL_FALSE, 0, 0);
       TEST_OPENGL_ERROR();
       glEnableVertexAttribArray(color_location);
+      TEST_OPENGL_ERROR();
+    }
+
+    if (texture_location != -1) {
+      glBindBuffer(GL_ARRAY_BUFFER, vbo_ids[index_vbo++]);
+      TEST_OPENGL_ERROR();
+      glBufferData(GL_ARRAY_BUFFER, texture_uv.size() * sizeof(float),
+                   texture_uv.data(), GL_STATIC_DRAW);
+      TEST_OPENGL_ERROR();
+      glVertexAttribPointer(texture_location, 2, GL_FLOAT, GL_FALSE, 0, 0);
+      TEST_OPENGL_ERROR();
+      glEnableVertexAttribArray(texture_location);
       TEST_OPENGL_ERROR();
     }
 

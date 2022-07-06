@@ -2,6 +2,16 @@
 
 #include "../rubiks_cube/rubiks_cube.h"
 #include "../utils/ascii_table.h"
+#include "../core/test_error.h"
+
+void active_texture(int texture_id) {
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+  GLint tex_location =
+      glGetUniformLocation(program->program_id, "texture_sampler");
+  TEST_OPENGL_ERROR();
+  glUniform1i(tex_location, 0);
+  TEST_OPENGL_ERROR();
+}
 
 void keyboard_normal_callback(unsigned char key, int x, int y) {
   if (rubiks_cube.rotating) return;
@@ -38,6 +48,11 @@ void keyboard_normal_callback(unsigned char key, int x, int y) {
         glEnable(GL_DEPTH_TEST);
         TEST_OPENGL_ERROR();
       }
+      break;
+
+    // Loop through textures
+    case ASCII_TAB:
+      active_texture(rubiks_cube.get_next_texture_id());
       break;
 
     // Mouvements de base //

@@ -39,7 +39,11 @@ float RubiksCube::update_status() {
   return elapsed;
 }
 
+int RubiksCube::get_next_texture_id() {
+  current_texture_id = (current_texture_id + 1) % texture_ids.size();
+  return texture_ids[current_texture_id];
+}
+
 void RubiksCube::reset() {
-  for (size_t i = 0; i < cubes.size(); i++)
-    cubes[i].reset();
+  for (size_t i = 0; i < cubes.size(); i++) cubes[i].reset();
 }

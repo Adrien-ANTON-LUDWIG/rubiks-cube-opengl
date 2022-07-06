@@ -8,6 +8,7 @@ int main(int argc, char *argv[]) {
   if (!init_glew()) throw new std::runtime_error("Glew error");
   if (!init_GL()) throw new std::runtime_error("Gl error");
   program = init_program();
+  init_textures();
 
   if (!init_object(program)) throw new std::runtime_error("Object error");
 
