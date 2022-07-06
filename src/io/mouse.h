@@ -37,7 +37,7 @@ void mouse_wheel_callback(int, int dir, int, int) {
     if (distance < 5) distance = 5;
   } else if (dir > 0) {
     distance++;
-    if (distance > 50) distance = 50;
+    if (distance > 100) distance = 100;
   }
   update_position();
   glutPostRedisplay();
