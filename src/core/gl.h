@@ -65,6 +65,7 @@ bool init_object(Program *program) {
 #include <algorithm>
 
 struct compare_cube {
+  // Comparator to sort in reverse order
   inline bool operator()(const Cube &cube1, const Cube &cube2) const {
     return (glm::length(camera_position - cube1.current_center) >
             glm::length(camera_position - cube2.current_center));
@@ -79,52 +80,26 @@ void display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   TEST_OPENGL_ERROR();
 
+  // Sort cubes to draw them from the farthest to the closest.
   std::sort(rubiks_cube.cubes.begin(), rubiks_cube.cubes.end(), compare_cube());
 
   auto elapsed = rubiks_cube.update_status();
 
-  // Draw back faces
-  {
-    glCullFace(GL_FRONT);
-    TEST_OPENGL_ERROR();
-
-    for (size_t i = 0; i < rubiks_cube.cubes.size(); i++) {
-      glBindVertexArray(rubiks_cube.cubes[i].vao_id);
-      TEST_OPENGL_ERROR();
-
-      // Pass the cube transformation matrix to the vertex shader
-      GLuint transform_location =
-          glGetUniformLocation(program->program_id, "transform");
-
-      glUniformMatrix4fv(
-          transform_location, 1, GL_FALSE,
-          glm::value_ptr(rubiks_cube.cubes[i].get_transform(elapsed)));
-
-      glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size() / 3);
-      TEST_OPENGL_ERROR();
-    }
-  }
-
   // Draw front faces
-  {
-    glCullFace(GL_BACK);
+  for (size_t i = 0; i < rubiks_cube.cubes.size(); i++) {
+    glBindVertexArray(rubiks_cube.cubes[i].vao_id);
     TEST_OPENGL_ERROR();
 
-    for (size_t i = 0; i < rubiks_cube.cubes.size(); i++) {
-      glBindVertexArray(rubiks_cube.cubes[i].vao_id);
-      TEST_OPENGL_ERROR();
+    // Pass the cube transformation matrix to the vertex shader
+    GLuint transform_location =
+        glGetUniformLocation(program->program_id, "transform");
 
-      // Pass the cube transformation matrix to the vertex shader
-      GLuint transform_location =
-          glGetUniformLocation(program->program_id, "transform");
+    glUniformMatrix4fv(
+        transform_location, 1, GL_FALSE,
+        glm::value_ptr(rubiks_cube.cubes[i].get_transform(elapsed)));
 
-      glUniformMatrix4fv(
-          transform_location, 1, GL_FALSE,
-          glm::value_ptr(rubiks_cube.cubes[i].get_transform(elapsed)));
-
-      glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size() / 3);
-      TEST_OPENGL_ERROR();
-    }
+    glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size() / 3);
+    TEST_OPENGL_ERROR();
   }
 
   glBindVertexArray(0);
@@ -178,6 +153,8 @@ bool init_GL() {
 
   // Backface culling
   glEnable(GL_CULL_FACE);
+  TEST_OPENGL_ERROR();
+  glCullFace(GL_BACK);
   TEST_OPENGL_ERROR();
 
   return true;
