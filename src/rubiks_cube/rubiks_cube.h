@@ -14,7 +14,7 @@
 
 #include "cube.h"
 
-#define DURATION 600.0f  // In milliseconds (=1s)
+#define DURATION 500.0f  // In milliseconds
 
 #define AXIS_X glm::vec3(1, 0, 0)
 #define AXIS_Y glm::vec3(0, 1, 0)
