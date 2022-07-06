@@ -12,8 +12,9 @@ out vec4 fragment_color;
 uniform mat4 transform;
 uniform mat4 model_view_matrix;
 uniform mat4 projection_matrix;
+uniform float opacity;
 
 void main() {
 	gl_Position = projection_matrix * model_view_matrix * transform * vec4(position, 1.0);
-	fragment_color = vec4(color, 0.6);
+	fragment_color = vec4(color, opacity);
 }

@@ -93,10 +93,14 @@ void display() {
     // Pass the cube transformation matrix to the vertex shader
     GLuint transform_location =
         glGetUniformLocation(program->program_id, "transform");
-
     glUniformMatrix4fv(
         transform_location, 1, GL_FALSE,
         glm::value_ptr(rubiks_cube.cubes[i].get_transform(elapsed)));
+
+    // Pass the cube opacity
+    GLuint opacity_location =
+        glGetUniformLocation(program->program_id, "opacity");
+    glUniform1f(opacity_location, rubiks_cube.opacity);
 
     glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size() / 3);
     TEST_OPENGL_ERROR();

@@ -26,6 +26,14 @@ void keyboard_normal_callback(unsigned char key, int x, int y) {
       rubiks_cube = RubiksCube();
       break;
 
+    // Reset rubik's cube original state
+    case ASCII_T_LOWER:
+      if (rubiks_cube.opacity == 1.0)
+        rubiks_cube.opacity = 0.6;
+      else
+        rubiks_cube.opacity = 1.0;
+      break;
+
     // Mouvements de base //
 
     // Right

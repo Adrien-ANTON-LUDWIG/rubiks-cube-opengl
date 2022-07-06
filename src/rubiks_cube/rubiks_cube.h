@@ -113,6 +113,7 @@ class RubiksCube {
   std::vector<Cube> cubes;
   std::chrono::steady_clock::time_point begin;
   bool rotating = false;
+  float opacity = 1.0;
 };
 
 static RubiksCube rubiks_cube;
