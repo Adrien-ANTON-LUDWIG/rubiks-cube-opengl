@@ -42,5 +42,7 @@ images
 # Binaries
 rubiks-cube-opengl
 
-# Texture
-textures
+# Videos
+videos
+*.mkv
+*.mp4
