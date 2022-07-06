@@ -20,8 +20,9 @@ void init_textures() {
   int width;
   int height;
   int channels;
+  stbi_set_flip_vertically_on_load(true);
   unsigned char *data =
-      stbi_load("textures/cubemaps_skybox.png", &width, &height, &channels, 0);
+      stbi_load("textures/debug.png", &width, &height, &channels, 0);
 
   if (!data) {
     std::cout << "Failed to load texture.\n";
