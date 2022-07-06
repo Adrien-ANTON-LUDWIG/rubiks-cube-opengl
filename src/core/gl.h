@@ -145,6 +145,10 @@ bool init_glut(int &argc, char *argv[]) {
 bool init_glew() { return (glewInit() == GLEW_OK); }
 
 bool init_GL() {
+  // Enable Depth test at init because we start with an opaque cube
+  glEnable(GL_DEPTH_TEST);
+  TEST_OPENGL_ERROR();
+
   // Set background color
   glClearColor(0.4, 0.4, 0.4, 1.0);
   TEST_OPENGL_ERROR();
