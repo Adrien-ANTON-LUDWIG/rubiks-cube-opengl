@@ -7,6 +7,7 @@ int main(int argc, char *argv[]) {
   if (!init_glut(argc, argv)) throw new std::runtime_error("Glut error");
   if (!init_glew()) throw new std::runtime_error("Glew error");
   if (!init_GL()) throw new std::runtime_error("Gl error");
+  init_textures();
   program = init_program();
 
   if (!init_object(program)) throw new std::runtime_error("Object error");
