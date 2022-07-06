@@ -21,33 +21,45 @@ void init_textures() {
   int height;
   int channels;
   unsigned char *data =
-      stbi_load("textures/grunge.png", &width, &height, &channels, 0);
+      stbi_load("textures/cubemaps_skybox.png", &width, &height, &channels, 0);
+
+  if (!data) {
+    std::cout << "Failed to load texture.\n";
+    throw;
+  }
 
   unsigned int texture;
   glGenTextures(1, &texture);
   TEST_OPENGL_ERROR();
   glBindTexture(GL_TEXTURE_2D, texture);
-
-  if (data) {
-    std::cout << "Succes to load texture.\n";
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, data);
-    TEST_OPENGL_ERROR();
-    glGenerateMipmap(GL_TEXTURE_2D);
-    TEST_OPENGL_ERROR();
-  } else {
-    std::cout << "Failed to load texture.\n";
-  }
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+               GL_UNSIGNED_BYTE, data);
+  TEST_OPENGL_ERROR();
+  glGenerateMipmap(GL_TEXTURE_2D);
+  TEST_OPENGL_ERROR();
 
   // Texture wrapping & filtering options
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  TEST_OPENGL_ERROR();
+  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  //  TEST_OPENGL_ERROR();
+  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  //  TEST_OPENGL_ERROR();
+  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  //  TEST_OPENGL_ERROR();
+  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  //  TEST_OPENGL_ERROR()
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                  GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   TEST_OPENGL_ERROR();
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+
+  GLint tex_location =
+      glGetUniformLocation(program->program_id, "texture_sampler");
   TEST_OPENGL_ERROR();
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glUniform1i(tex_location, 0);
   TEST_OPENGL_ERROR();
+
   stbi_image_free(data);
 }
 
@@ -63,8 +75,7 @@ bool init_object(Program *program) {
     TEST_OPENGL_ERROR();
     GLint color_location = glGetAttribLocation(program->program_id, "color");
     TEST_OPENGL_ERROR();
-    GLint texture_location =
-        glGetAttribLocation(program->program_id, "texture");
+    GLint texture_location = glGetAttribLocation(program->program_id, "uv");
     TEST_OPENGL_ERROR();
 
     glGenVertexArrays(1, &vao_ids[i]);
@@ -105,6 +116,9 @@ bool init_object(Program *program) {
 
     if (texture_location != -1) {
       glBindBuffer(GL_ARRAY_BUFFER, vbo_ids[index_vbo++]);
+      TEST_OPENGL_ERROR();
+      glBufferData(GL_ARRAY_BUFFER, texture_uv.size() * sizeof(float),
+                   texture_uv.data(), GL_STATIC_DRAW);
       TEST_OPENGL_ERROR();
       glVertexAttribPointer(texture_location, 2, GL_FLOAT, GL_FALSE, 0, 0);
       TEST_OPENGL_ERROR();

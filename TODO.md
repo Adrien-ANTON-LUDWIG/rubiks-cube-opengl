@@ -12,6 +12,7 @@ These are some things to update or implement in the future (no priority):
 * Smooth rotation
 * Scramble
 * Rotations using mouse
+* Desactivate middle click on mouse
 
 ## Done
 

@@ -11,7 +11,7 @@ CC := g++
 CFLAGS := -std=c++11 -pedantic -Werror -Wall -Wextra -g
 LDFLAGS := -fsanitize=address
 
-CXX_FLAGS += -Wall -Wextra -O3 -g -std=c++11 -m64 -march=native -fopt-info-vec-optimized #-fopt-info-vec-missed -ftree-vectorize
+CXX_FLAGS += -Wall -Wextra -O3 -g -std=c++11 -m64 -march=native -fopt-info-vec-optimized -fsanitize=address #-fopt-info-vec-missed -ftree-vectorize
 LDXX_FLAGS = -lGL  -lGLEW -lglut -lpthread
 
 all: $(TARGET)
