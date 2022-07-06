@@ -1,14 +1,16 @@
 #pragma once
 
+//#include <cmath>
+
 #include "../core/program.h"
 
 #define PI 3.14159265358979323846
 #define Z_NEAR 0.5
 #define Z_FAR 200
-#define INITIAL_ANGLE_ALPHA 45 * PI / 180  // 45° to radians
-#define INITIAL_ANGLE_BETA 45 * PI / 180  // 45° to radians
+#define INITIAL_ANGLE_ALPHA 60.5 * PI / 180  // 60.5° to radians
+#define INITIAL_ANGLE_BETA 24 * PI / 180   // 24° to radians
 
-double distance = 50;
+double distance = 15;
 double angle_alpha = INITIAL_ANGLE_ALPHA;
 double angle_beta = INITIAL_ANGLE_BETA;
 double sky_up = 1;
@@ -16,6 +18,11 @@ glm::vec4 camera_position;
 
 int old_pos_x = 0;
 int old_pos_y = 0;
+
+float window_width = 1024;
+float window_height = 1024;
+
+float fov = 45 * PI / 180; // 60° to radians
 
 void frustum(GLfloat data[16], const float &left, const float &right,
              const float &bottom, const float &top, const float &z_near,
@@ -120,7 +127,13 @@ void update_position() {
   // std::cout << "model_view_matrix_location " << model_view_matrix_location <<
   // std::endl;
   glUniformMatrix4fv(model_view_matrix_location, 1, GL_TRUE, model_view_matrix);
-  frustum(projection_matrix, -0.05, 0.05, -0.05, 0.05, Z_NEAR, Z_FAR);
+
+  float aspect = (float) window_width / (float) window_height;
+  float top = tan(fov * 0.5) * Z_NEAR;
+  float bottom = -top;
+  float left = aspect * bottom;
+  float right = aspect * top;
+  frustum(projection_matrix, left, right, bottom, top, Z_NEAR, Z_FAR);
 
   GLint projection_matrix_location =
       glGetUniformLocation(program->program_id, "projection_matrix");

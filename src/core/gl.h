@@ -50,8 +50,7 @@ void init_textures() {
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                    GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     TEST_OPENGL_ERROR();
 
@@ -188,6 +187,14 @@ void window_resize(int width, int height) {
   // ");TEST_OPENGL_ERROR();" << std::endl;
   glViewport(0, 0, width, height);
   TEST_OPENGL_ERROR();
+
+  // Update camera properties
+  window_width = width;
+  window_height = height;
+
+  update_position();
+  glutPostRedisplay();
+  TEST_OPENGL_ERROR();
 }
 
 bool init_glut(int &argc, char *argv[]) {
@@ -195,7 +202,7 @@ bool init_glut(int &argc, char *argv[]) {
   glutInitContextVersion(4, 5);
   glutInitContextProfile(GLUT_CORE_PROFILE);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-  glutInitWindowSize(1024, 1024);
+  glutInitWindowSize(window_width, window_height);
   glutInitWindowPosition(10, 10);
   glutCreateWindow("Test OpenGL - POGL");
 
